@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
+  --color-pastel-pink: #FFE5E5;
+  --color-pastel-yellow: #FFF9C4;
+  --color-pastel-green: #E8F5E9;
+  --color-pastel-blue: #E3F2FD;
+  --color-pastel-purple: #F3E5F5;
+  --color-ink: #4A4A4A;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #FFFDF9; /* Warm off-white */
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide scrollbar for clean UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #E2E8F0;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #CBD5E1;
+}
