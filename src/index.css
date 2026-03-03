@@ -1,35 +1,82 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
-  --color-pastel-pink: #FFE5E5;
-  --color-pastel-yellow: #FFF9C4;
-  --color-pastel-green: #E8F5E9;
-  --color-pastel-blue: #E3F2FD;
-  --color-pastel-purple: #F3E5F5;
-  --color-ink: #4A4A4A;
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+
+  --color-primary-50: #fef1f2;
+  --color-primary-100: #fee2e2;
+  --color-primary-500: #ef4444;
+  --color-primary-600: #dc2626;
+
+  --color-surface: rgba(255, 255, 255, 0.75);
+  --color-surface-hover: rgba(255, 255, 255, 0.9);
+
+  --color-ink: #1e293b;
+  --color-ink-light: #64748b;
+
+  --color-bg-base: #F8FAFC;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #FFFDF9; /* Warm off-white */
+  background-color: var(--color-bg-base);
+  /* Subtle mesh gradient background for depth */
+  background-image: radial-gradient(at 0% 0%, hsla(353, 100%, 96%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(28, 100%, 94%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(228, 100%, 97%, 1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(189, 100%, 96%, 1) 0, transparent 50%);
+  background-attachment: fixed;
   color: var(--color-ink);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Hide scrollbar for clean UI */
+/* Glassmorphism Utilities */
+@utility glass {
+  background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
+
+@utility glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.6));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.8));
+    border-color: rgba(255, 255, 255, 1);
+  }
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar for clean UI but keep it functional */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
+  background: #cbd5e1;
   border-radius: 10px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #CBD5E1;
+  background: #94a3b8;
 }
