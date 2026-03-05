@@ -10,7 +10,7 @@ export interface GameInfo {
 export const GAMES: GameInfo[] = [
   {
     id: 'coding-rabbit',
-    name: '像素编程',
+    name: '像素编码',
     description: '拖放指令块，为小动物编写程序，帮它收集所有食物！',
     color: 'bg-green-100 text-green-600 border-green-200',
     icon: 'Rabbit',

@@ -63,10 +63,10 @@ const LEVELS: LevelDef[] = [
     id: 2,
     name: '直行',
     grid: [
-      [G, G, G, G, G],
+      [G, G, G, T, G],
       [G, G, C, G, G],
-      [G, G, G, G, G],
-      [G, G, C, G, G],
+      [T, G, G, G, G],
+      [G, G, C, G, T],
       [G, G, G, G, G],
     ],
     rabbitStart: { row: 4, col: 2, dir: 'up' },
@@ -78,10 +78,10 @@ const LEVELS: LevelDef[] = [
     id: 3,
     name: '长途旅行',
     grid: [
-      [G, G, C, G, G],
+      [T, G, C, G, T],
       [G, G, G, G, G],
-      [G, G, G, G, G],
-      [G, G, G, G, G],
+      [G, G, G, T, G],
+      [G, T, G, G, G],
       [G, G, G, G, G],
     ],
     rabbitStart: { row: 4, col: 2, dir: 'up' },
@@ -93,11 +93,11 @@ const LEVELS: LevelDef[] = [
     id: 4,
     name: '转弯',
     grid: [
-      [G, G, G, G, G],
-      [G, G, G, G, G],
+      [G, G, G, T, G],
+      [G, T, G, G, G],
       [G, G, G, G, C],
-      [G, G, G, G, G],
-      [G, G, G, G, G],
+      [T, G, G, G, G],
+      [G, G, G, T, G],
     ],
     rabbitStart: { row: 2, col: 0, dir: 'right' },
     maxCmds: 5,
@@ -108,10 +108,10 @@ const LEVELS: LevelDef[] = [
     id: 5,
     name: '转个弯',
     grid: [
+      [G, T, G, G, G],
+      [G, G, C, G, T],
       [G, G, G, G, G],
-      [G, G, C, G, G],
-      [G, G, G, G, G],
-      [G, G, G, G, G],
+      [T, G, G, T, G],
       [G, G, G, G, G],
     ],
     rabbitStart: { row: 4, col: 0, dir: 'right' },
@@ -197,29 +197,99 @@ const LEVELS: LevelDef[] = [
   },
 ];
 
+// ─────────────────────────────────────────────
+// BFS: find shortest grid path between two points (ignoring trees)
+// Returns array of [row, col] intermediate cells (excluding start & end)
+// ─────────────────────────────────────────────
+function bfsPath(
+  grid: Cell[][],
+  startR: number, startC: number,
+  endR: number, endC: number,
+): [number, number][] {
+  const rows = grid.length;
+  const cols = grid[0].length;
+  const visited = Array(rows).fill(0).map(() => Array(cols).fill(false));
+  const prev: ([number, number] | null)[][] = Array(rows).fill(0).map(() => Array(cols).fill(null));
+  const queue: [number, number][] = [[startR, startC]];
+  visited[startR][startC] = true;
+
+  const deltas = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+  while (queue.length > 0) {
+    const [r, c] = queue.shift()!;
+    if (r === endR && c === endC) break;
+    for (const [dr, dc] of deltas) {
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && !visited[nr][nc] && grid[nr][nc].ground && !grid[nr][nc].tree) {
+        visited[nr][nc] = true;
+        prev[nr][nc] = [r, c];
+        queue.push([nr, nc]);
+      }
+    }
+  }
+
+  // Reconstruct path
+  if (!visited[endR][endC]) return []; // no path
+  const path: [number, number][] = [];
+  let cur: [number, number] | null = [endR, endC];
+  while (cur && !(cur[0] === startR && cur[1] === startC)) {
+    path.unshift(cur);
+    cur = prev[cur[0]][cur[1]];
+  }
+  path.pop(); // remove end (carrot cell itself)
+  return path; // intermediate cells only
+}
+
 // Generate 20 more random levels
 for (let id = 11; id <= 30; id++) {
   // 5x5 Grid
-  const grid = Array(5).fill(0).map(() => Array(5).fill(G));
+  const grid = Array(5).fill(0).map(() => Array(5).fill(G).map(() => ({ ...G })));
 
-  // Random number of trees and carrots
-  const numTrees = Math.floor(Math.random() * 4) + 1; // 1 to 4 trees
+  const startR = 4;
+  const startC = Math.floor(Math.random() * 5);
   const numCarrots = Math.floor(Math.random() * 3) + 2; // 2 to 4 carrots
 
-  // Place trees randomly (not on bottom row where rabbit usually starts)
-  for (let i = 0; i < numTrees; i++) {
+  // Place carrots first (not on start, not on bottom row)
+  const carrotCells: [number, number][] = [];
+  let attempts = 0;
+  while (carrotCells.length < numCarrots && attempts < 50) {
+    attempts++;
     const r = Math.floor(Math.random() * 4); // row 0-3
     const c = Math.floor(Math.random() * 5);
-    grid[r][c] = T;
+    if (!(r === startR && c === startC) && !grid[r][c].carrot) {
+      grid[r][c] = { ...C };
+      carrotCells.push([r, c]);
+    }
   }
 
-  // Place carrots randomly
-  for (let i = 0; i < numCarrots; i++) {
-    const r = Math.floor(Math.random() * 4); // row 0-3
+  // Collect all shortest-path intermediate cells (start → each carrot)
+  const pathCells: [number, number][] = [];
+  for (const [cr, cc] of carrotCells) {
+    const p = bfsPath(grid, startR, startC, cr, cc);
+    pathCells.push(...p);
+  }
+
+  // Remove duplicates and cells that are already carrots or the start
+  const uniquePathCells = pathCells.filter(([r, c]) =>
+    !grid[r][c].carrot && !(r === startR && c === startC)
+  ).filter(([r, c], i, arr) =>
+    arr.findIndex(([pr, pc]) => pr === r && pc === c) === i
+  );
+
+  // Place 1-2 mushrooms on the shortest path (if enough cells available)
+  const numOnPath = Math.min(2, Math.max(1, Math.floor(uniquePathCells.length / 2)));
+  const shuffled = uniquePathCells.sort(() => Math.random() - 0.5);
+  for (let i = 0; i < numOnPath && i < shuffled.length; i++) {
+    const [r, c] = shuffled[i];
+    grid[r][c] = { ...T };
+  }
+
+  // Place 1-2 extra random mushrooms off-path for decoration
+  const extraTrees = Math.floor(Math.random() * 2) + 1;
+  for (let i = 0; i < extraTrees; i++) {
+    const r = Math.floor(Math.random() * 4);
     const c = Math.floor(Math.random() * 5);
-    // Don't overwrite trees
-    if (!grid[r][c].tree) {
-      grid[r][c] = C;
+    if (!grid[r][c].tree && !grid[r][c].carrot && !(r === startR && c === startC)) {
+      grid[r][c] = { ...T };
     }
   }
 
@@ -227,36 +297,62 @@ for (let id = 11; id <= 30; id++) {
     id,
     name: `随机挑战 ${id}`,
     grid,
-    rabbitStart: { row: 4, col: Math.floor(Math.random() * 5), dir: 'up' },
+    rabbitStart: { row: startR, col: startC, dir: 'up' },
     maxCmds: 15,
     availableCmds: ['forward', 'left', 'right', 'loop'],
-    hint: '这是由程序生成的进阶挑战关卡！',
+    hint: '注意！蘑菇就在路线上，要绕开才能采到食物！',
   });
 }
 
 function generateEndlessLevel(id: number): LevelDef {
   // larger 8x8 grid for endless mode
-  const grid = Array(8).fill(0).map(() => Array(8).fill(G));
-  const numTrees = Math.floor(Math.random() * 10) + 5;
+  const grid = Array(8).fill(0).map(() => Array(8).fill(G).map(() => ({ ...G })));
   const numCarrots = Math.floor(Math.random() * 6) + 3;
 
   const startR = Math.floor(Math.random() * 2) + 6; // start in bottom 2 rows
-  const startC = Math.floor(Math.random() * 8); // anywhere on cols
+  const startC = Math.floor(Math.random() * 8);
   const directions: Direction[] = ['up', 'left', 'right'];
 
-  // place trees
-  for (let i = 0; i < numTrees; i++) {
-    const r = Math.floor(Math.random() * 7);
+  // Place carrots first (not on start cell)
+  const carrotCells: [number, number][] = [];
+  let attempts = 0;
+  while (carrotCells.length < numCarrots && attempts < 80) {
+    attempts++;
+    const r = Math.floor(Math.random() * 7); // row 0-6
     const c = Math.floor(Math.random() * 8);
-    if (!(r === startR && c === startC)) grid[r][c] = T;
+    if (!grid[r][c].carrot && !(r === startR && c === startC)) {
+      grid[r][c] = { ...C };
+      carrotCells.push([r, c]);
+    }
   }
 
-  // place carrots
-  for (let i = 0; i < numCarrots; i++) {
+  // BFS to find path cells from start → each carrot
+  const pathCells: [number, number][] = [];
+  for (const [cr, cc] of carrotCells) {
+    const p = bfsPath(grid, startR, startC, cr, cc);
+    pathCells.push(...p);
+  }
+
+  // Deduplicate, exclude start and carrot cells
+  const uniquePathCells = pathCells
+    .filter(([r, c]) => !grid[r][c].carrot && !(r === startR && c === startC))
+    .filter(([r, c], i, arr) => arr.findIndex(([pr, pc]) => pr === r && pc === c) === i);
+
+  // Place 2-3 mushrooms on the shortest path
+  const numOnPath = Math.min(3, Math.max(2, Math.floor(uniquePathCells.length / 3)));
+  const shuffled = uniquePathCells.sort(() => Math.random() - 0.5);
+  for (let i = 0; i < numOnPath && i < shuffled.length; i++) {
+    const [r, c] = shuffled[i];
+    grid[r][c] = { ...T };
+  }
+
+  // Place extra random mushrooms off-path
+  const extraTrees = Math.floor(Math.random() * 5) + 3;
+  for (let i = 0; i < extraTrees; i++) {
     const r = Math.floor(Math.random() * 7);
     const c = Math.floor(Math.random() * 8);
-    if (!grid[r][c].tree && !(r === startR && c === startC)) {
-      grid[r][c] = C;
+    if (!grid[r][c].tree && !grid[r][c].carrot && !(r === startR && c === startC)) {
+      grid[r][c] = { ...T };
     }
   }
 
@@ -265,9 +361,9 @@ function generateEndlessLevel(id: number): LevelDef {
     name: `无尽模式 ${id}`,
     grid,
     rabbitStart: { row: startR, col: startC, dir: directions[Math.floor(Math.random() * 3)] },
-    maxCmds: 20, // More commands for larger map
+    maxCmds: 20,
     availableCmds: ['forward', 'left', 'right', 'loop'],
-    hint: '超级难度的无尽挑战！',
+    hint: '注意！蘑菇挡在路线上，必须绕开才能采到食物！',
   };
 }
 
@@ -301,6 +397,7 @@ interface ExecState {
   grid: Cell[][];
   collected: number;
   total: number;
+  hitTree: boolean; // 是否撞到蘑菇
 }
 
 function flattenCmds(cmds: Cmd[]): string[] {
@@ -323,18 +420,24 @@ function applyStep(
   s: ExecState,
 ): ExecState {
   const ns = { ...s, grid: s.grid.map(r => r.map(c => ({ ...c }))) };
+  if (s.hitTree) return ns; // 已经撞过了，停止执行
   if (step === 'forward') {
     const d = MOVE_DELTA[ns.dir];
     const nr = ns.row + d.dr;
     const nc = ns.col + d.dc;
     const rows = ns.grid.length;
     const cols = ns.grid[0].length;
-    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && ns.grid[nr][nc].ground && !ns.grid[nr][nc].tree) {
-      ns.row = nr;
-      ns.col = nc;
-      if (ns.grid[nr][nc].carrot) {
-        ns.grid[nr][nc] = { ...ns.grid[nr][nc], carrot: false };
-        ns.collected += 1;
+    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && ns.grid[nr][nc].ground) {
+      if (ns.grid[nr][nc].tree) {
+        // 💥 撞到蘑菇！标记失败，兔子停在原位
+        ns.hitTree = true;
+      } else {
+        ns.row = nr;
+        ns.col = nc;
+        if (ns.grid[nr][nc].carrot) {
+          ns.grid[nr][nc] = { ...ns.grid[nr][nc], carrot: false };
+          ns.collected += 1;
+        }
       }
     }
   } else if (step === 'left') {
@@ -531,12 +634,42 @@ const Barrier3D = () => {
 };
 
 const Plant3D = () => {
+  // 🌸 Tall blue-purple flower - visually distinct from red mushroom Barrier3D
+  // Key differences: tall stem (not squat cap), blue-purple petals (not red), animated float
   return (
-    <div className="absolute inset-0" style={{ transformStyle: 'preserve-3d' }}>
-      <Cube x={32} y={32} z={0} w={20} d={20} h={12} color="#15803d" top="#22c55e" left="#166534" back="#166534" right="#15803d" front="#16a34a" bottom="#14532d" />
-      <Cube x={36} y={36} z={12} w={12} d={12} h={8} color="#16a34a" top="#4ade80" left="#15803d" back="#15803d" right="#16a34a" front="#22c55e" bottom="#166534" />
-      <div style={{ position: 'absolute', left: 24, top: 24, width: 32, height: 32, backgroundColor: 'rgba(0,0,0,0.15)', filter: 'blur(3px)', transform: 'translateZ(1px)' }} />
-    </div>
+    <motion.div
+      className="absolute inset-0"
+      style={{ transformStyle: 'preserve-3d', transform: 'scale(0.88) translateZ(-2px)' }}
+      animate={{ z: [0, 6, 0] }}
+      transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
+    >
+      {/* Base / Ground leaves - spread wide */}
+      <Cube x={22} y={34} z={0} w={20} d={12} h={5} color="#16a34a" top="#4ade80" left="#15803d" right="#22c55e" front="#15803d" back="#166534" />
+      <Cube x={38} y={34} z={0} w={20} d={12} h={5} color="#16a34a" top="#4ade80" left="#15803d" right="#22c55e" front="#15803d" back="#166534" />
+      <Cube x={32} y={22} z={0} w={12} d={20} h={5} color="#16a34a" top="#4ade80" left="#15803d" right="#22c55e" front="#15803d" back="#166534" />
+
+      {/* Tall slender stem - this makes it look like a flower, not a mushroom */}
+      <Cube x={34} y={34} z={5} w={12} d={12} h={28} color="#22c55e" top="#4ade80" left="#15803d" right="#22c55e" front="#16a34a" back="#15803d" />
+
+      {/* Diagonal petals (×) - purple/blue, clearly cross-shaped radiating outward */}
+      {/* Top petal */}
+      <Cube x={28} y={18} z={33} w={24} d={16} h={10} color="#8b5cf6" top="#a78bfa" left="#7c3aed" right="#8b5cf6" front="#7c3aed" back="#6d28d9" />
+      {/* Bottom petal */}
+      <Cube x={28} y={46} z={33} w={24} d={16} h={10} color="#8b5cf6" top="#a78bfa" left="#7c3aed" right="#8b5cf6" front="#7c3aed" back="#6d28d9" />
+      {/* Left petal */}
+      <Cube x={14} y={30} z={33} w={18} d={20} h={10} color="#7c3aed" top="#a78bfa" left="#6d28d9" right="#8b5cf6" front="#7c3aed" back="#6d28d9" />
+      {/* Right petal */}
+      <Cube x={48} y={30} z={33} w={18} d={20} h={10} color="#7c3aed" top="#a78bfa" left="#6d28d9" right="#8b5cf6" front="#7c3aed" back="#6d28d9" />
+
+      {/* Flower center - bright warm yellow, high contrast against purple */}
+      <Cube x={28} y={28} z={36} w={24} d={24} h={10} color="#f59e0b" top="#fcd34d" left="#d97706" right="#f59e0b" front="#d97706" back="#b45309" />
+
+      {/* Center highlight dot */}
+      <Cube x={32} y={32} z={46} w={16} d={16} h={4} color="#fef08a" top="#fef9c3" left="#fde047" right="#fef08a" front="#fde047" />
+
+      {/* Shadow */}
+      <div style={{ position: 'absolute', left: 20, top: 20, width: 40, height: 40, backgroundColor: 'rgba(0,0,0,0.12)', filter: 'blur(4px)', transform: 'translateZ(1px)' }} />
+    </motion.div>
   );
 };
 
@@ -846,16 +979,16 @@ function GameGrid({
                     style={{
                       backgroundColor: cell.tree
                         ? '#fef3c7'   // warm cream background for mushroom tiles
-                        : (isDecorTree ? '#5bad24' : '#6fcb34'),
+                        : '#6fcb34', // Uniform green for all non-tree tiles
                       borderColor: cell.tree ? 'rgba(180,130,0,0.4)' : 'rgba(120,219,59,0.5)',
-                      boxShadow: cell.tree ? 'inset 0 0 10px rgba(254,200,0,0.3)' : 'inset 0 0 10px rgba(0,0,0,0.05)',
+                      boxShadow: cell.tree ? 'inset 0 0 10px rgba(254,200,0,0.3)' : 'inset 0 0 10px rgba(0,0,0,0.03)',
                       transform: 'translateZ(1px)'
                     }} />
                 )}
 
                 {/* 3D Entities */}
                 {cell.tree && <Barrier3D />}
-                {isDecorTree && <Plant3D />}
+                {/* isDecorTree && <Plant3D /> */}{/* 小花装饰已隐藏，需要时取消注释 */}
                 {cell.carrot && !isRabbit && <Collectible />}
                 {isRabbit && <Player dir={displayRabbit.dir} />}
               </div>
@@ -1059,10 +1192,11 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
   const [endlessLevels, setEndlessLevels] = useState<LevelDef[]>([]);
   const [program, setProgram] = useState<Cmd[]>([]);
   const [phase, setPhase] = useState<GamePhase>('idle');
-  const [steps, setSteps] = useState<{ row: number; col: number; dir: Direction; grid: Cell[][] }[]>([]);
+  const [steps, setSteps] = useState<{ row: number; col: number; dir: Direction; grid: Cell[][]; hitTree: boolean }[]>([]);
+  const [failReason, setFailReason] = useState<'hitTree' | 'incomplete' | null>(null);
   const [stepIdx, setStepIdx] = useState(0);
   const [speed, setSpeed] = useState(1);
-  const [gameMode, setGameMode] = useState<'beginner' | 'hard'>('hard');
+  const [gameMode, setGameMode] = useState<'beginner' | 'hard'>('beginner');
   const [gameTheme, setGameTheme] = useState<GameTheme>(THEMES[0]);
   const [completedLevels, setCompletedLevels] = useState<Record<number, boolean>>({ 30: true }); // Unlock for testing
   const [showLevelSelect, setShowLevelSelect] = useState(false);
@@ -1109,6 +1243,7 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
       grid: gridCopy,
       collected: 0,
       total: totalCarrots,
+      hitTree: false,
     };
   }, [effectiveGrid, level.rabbitStart, totalCarrots]);
 
@@ -1169,9 +1304,11 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
     for (const step of flat) {
       s = applyStep(step, s);
       allStates.push({ ...s });
+      if (s.hitTree) break; // 撞蘑菇后不再继续计算后续步骤
     }
 
-    setSteps(allStates.map(es => ({ row: es.row, col: es.col, dir: es.dir, grid: es.grid })));
+    setFailReason(null);
+    setSteps(allStates.map(es => ({ row: es.row, col: es.col, dir: es.dir, grid: es.grid, hitTree: es.hitTree })));
     setStepIdx(0);
     setPhase('running');
   };
@@ -1187,11 +1324,8 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
       setStepIdx(prev => {
         const next = prev + 1;
         if (next >= steps.length) {
-          // Done
+          // Done - check final state
           const lastState = steps[steps.length - 1];
-          const collectedCount = lastState.grid.flat().filter(c => !c.carrot).length -
-            (level.grid.flat().filter(c => !c.carrot).length);
-          // Count carrots not present in last state
           const totalCarrots2 = level.grid.flat().filter(c => c.carrot).length;
           const remaining = lastState.grid.flat().filter(c => c.carrot).length;
           const collectedFinal = totalCarrots2 - remaining;
@@ -1199,15 +1333,24 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
           setDisplayGrid(lastState.grid);
           setRabbit({ row: lastState.row, col: lastState.col, dir: lastState.dir });
 
-          if (totalCarrots2 > 0 && collectedFinal >= totalCarrots2) {
+          if (lastState.hitTree) {
+            // 💥 撞蘑菇失败
+            setTimeout(() => {
+              setFailReason('hitTree');
+              setPhase('failed');
+            }, 300);
+          } else if (totalCarrots2 > 0 && collectedFinal >= totalCarrots2) {
             setTimeout(() => {
               setPhase('won');
               setShowComplete(true);
               setCompletedLevels(prev => ({ ...prev, [levelId]: true }));
-              if (onGameOver) onGameOver(`编程兔：完成第${levelId}关！`);
+              if (onGameOver) onGameOver(`像素编码：完成第${levelId}关！`);
             }, 400);
           } else {
-            setTimeout(() => setPhase('failed'), 400);
+            setTimeout(() => {
+              setFailReason('incomplete');
+              setPhase('failed');
+            }, 400);
           }
           return steps.length;
         }
@@ -1283,7 +1426,7 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
               {gameTheme.emoji}
             </div>
             <h1 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-500 tracking-tight whitespace-nowrap">
-              {gameTheme.id === 'ultraman' ? '奥特打怪兽' : gameTheme.id === 'rabbit' ? 'CodingRabbit' : `Coding${gameTheme.name}`}
+              {gameTheme.id === 'ultraman' ? '奥特打怪兽' : '像素编码'}
             </h1>
           </div>
           <div className="h-6 w-px bg-slate-200 mx-1"></div>
@@ -1474,7 +1617,7 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
             {level.hint && (
               <div className="mt-4 pt-4 border-t border-slate-200/50 text-center">
                 <p className="text-xs font-bold text-slate-400">
-                  <span className="text-amber-500 mr-1">TIPS:</span>
+                  <span className="text-amber-500 mr-1">提示:</span>
                   关卡 {level.id}: {level.hint}
                 </p>
               </div>
@@ -1601,15 +1744,28 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
               transition={{ type: 'spring', damping: 14, stiffness: 200 }}
               className="bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-4 max-w-xs w-full mx-4"
             >
-              <div className="text-6xl">😕</div>
-              <h2 className="text-2xl font-extrabold text-slate-800">没有收集完！</h2>
-              <p className="text-slate-500 text-sm text-center">
-                程序执行完毕，但还有{gameTheme.collectibleName}没有采到。
-                <br />试着调整你的指令序列！
-              </p>
-              <p className="text-lg font-bold text-orange-500">
-                {gameTheme.collectibleEmoji} {collected}/{totalCarrots} 已收集
-              </p>
+              {failReason === 'hitTree' ? (
+                <>
+                  <div className="text-6xl">🍄</div>
+                  <h2 className="text-2xl font-extrabold text-slate-800">撞到蘑菇了！</h2>
+                  <p className="text-slate-500 text-sm text-center">
+                    蘑菇是危险的障碍物，不能穿越！
+                    <br />试着重新规划路线，绕开蘑菇吧。
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="text-6xl">😕</div>
+                  <h2 className="text-2xl font-extrabold text-slate-800">没有收集完！</h2>
+                  <p className="text-slate-500 text-sm text-center">
+                    程序执行完毕，但还有{gameTheme.collectibleName}没有采到。
+                    <br />试着调整你的指令序列！
+                  </p>
+                  <p className="text-lg font-bold text-orange-500">
+                    {gameTheme.collectibleEmoji} {collected}/{totalCarrots} 已收集
+                  </p>
+                </>
+              )}
               <motion.button
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
