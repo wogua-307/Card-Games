@@ -11,6 +11,8 @@ import { ChessGame } from '../games/Chess';
 import { Go } from '../games/Go';
 import { AnimalChess } from '../games/AnimalChess';
 import { Junqi } from '../games/Junqi';
+import { Ludo } from '../games/Ludo';
+import { CodingRabbit } from '../games/CodingRabbit';
 
 interface GameRoomProps {
   gameId: string;
@@ -34,7 +36,7 @@ export function GameRoom({ gameId, onBack }: GameRoomProps) {
       result,
       duration,
     });
-    
+
     if (result.includes('胜') || result.includes('Win')) {
       confetti({
         particleCount: 150,
@@ -61,6 +63,10 @@ export function GameRoom({ gameId, onBack }: GameRoomProps) {
         return <AnimalChess key={key} onGameOver={handleGameOver} />;
       case 'junqi':
         return <Junqi key={key} onGameOver={handleGameOver} />;
+      case 'ludo':
+        return <Ludo key={key} onGameOver={handleGameOver} onBack={onBack} />;
+      case 'coding-rabbit':
+        return <CodingRabbit key={key} onGameOver={handleGameOver} />;
       default:
         return <div className="p-10 text-center text-slate-500 font-bold">游戏开发中...</div>;
     }
@@ -79,7 +85,7 @@ export function GameRoom({ gameId, onBack }: GameRoomProps) {
           </button>
           <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{game.name}</h2>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowRules(!showRules)}

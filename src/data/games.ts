@@ -9,6 +9,14 @@ export interface GameInfo {
 
 export const GAMES: GameInfo[] = [
   {
+    id: 'coding-rabbit',
+    name: '像素编程',
+    description: '拖放指令块，为小动物编写程序，帮它收集所有食物！',
+    color: 'bg-green-100 text-green-600 border-green-200',
+    icon: 'Rabbit',
+    players: 1,
+  },
+  {
     id: 'gomoku',
     name: '五子棋',
     description: '经典连珠游戏，先连成五子者胜。',
@@ -16,14 +24,14 @@ export const GAMES: GameInfo[] = [
     icon: 'CircleDot',
     players: 2,
   },
-  {
-    id: 'chess',
-    name: '国际象棋',
-    description: '策略深远的西方经典棋类。',
-    color: 'bg-blue-100 text-blue-600 border-blue-200',
-    icon: 'Crown',
-    players: 2,
-  },
+  // {
+  //   id: 'chess',
+  //   name: '国际象棋',
+  //   description: '策略深远的西方经典棋类。',
+  //   color: 'bg-blue-100 text-blue-600 border-blue-200',
+  //   icon: 'Crown',
+  //   players: 2,
+  // },
   {
     id: 'go',
     name: '围棋',
@@ -32,22 +40,30 @@ export const GAMES: GameInfo[] = [
     icon: 'Circle',
     players: 2,
   },
-  {
-    id: 'animal-chess',
-    name: '斗兽棋',
-    description: '象狮虎豹狼狗猫鼠，趣味吃子。',
-    color: 'bg-orange-100 text-orange-600 border-orange-200',
-    icon: 'Cat',
-    players: 2,
-  },
-  {
-    id: 'junqi',
-    name: '军棋',
-    description: '排兵布阵，运筹帷幄决胜千里。',
-    color: 'bg-emerald-100 text-emerald-600 border-emerald-200',
-    icon: 'Swords',
-    players: 2,
-  },
+  // {
+  //   id: 'animal-chess',
+  //   name: '斗兽棋',
+  //   description: '象狮虎豹狼狗猫鼠，趣味吃子。',
+  //   color: 'bg-orange-100 text-orange-600 border-orange-200',
+  //   icon: 'Cat',
+  //   players: 2,
+  // },
+  // {
+  //   id: 'junqi',
+  //   name: '军棋',
+  //   description: '排兵布阵，运筹帷幄决胜千里。',
+  //   color: 'bg-emerald-100 text-emerald-600 border-emerald-200',
+  //   icon: 'Swords',
+  //   players: 2,
+  // },
+  // {
+  //   id: 'ludo',
+  //   name: '飞行棋',
+  //   description: '掷骰子，走飞机，先把四架飞机送回家者胜。',
+  //   color: 'bg-amber-100 text-amber-600 border-amber-200',
+  //   icon: 'Plane',
+  //   players: 4,
+  // },
 ];
 
 export interface TutorialInfo {
