@@ -75,35 +75,35 @@ export function GameRoom({ gameId, onBack }: GameRoomProps) {
   return (
     <div className="flex flex-col h-full bg-[#FFFDF9]">
       {/* Header */}
-      <header className="flex items-center justify-between p-4 md:p-6 bg-white border-b border-rose-100 shadow-sm z-10">
-        <div className="flex items-center gap-4">
+      <header className="flex items-center justify-between px-3 py-2 md:p-6 bg-white border-b border-rose-100 shadow-sm z-10 shrink-0">
+        <div className="flex items-center gap-2 md:gap-4">
           <button
             onClick={onBack}
-            className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+            className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"
           >
-            <ArrowLeft size={20} strokeWidth={2.5} />
+            <ArrowLeft size={18} strokeWidth={2.5} />
           </button>
-          <h2 className="text-xl font-extrabold text-slate-800 tracking-tight">{game.name}</h2>
+          <h2 className="text-base md:text-xl font-extrabold text-slate-800 tracking-tight">{game.name}</h2>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <button
             onClick={() => setShowRules(!showRules)}
-            className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+            className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"
           >
-            <HelpCircle size={20} strokeWidth={2.5} />
+            <HelpCircle size={18} strokeWidth={2.5} />
           </button>
           <button
             onClick={handleRestart}
-            className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"
+            className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors"
           >
-            <RotateCcw size={20} strokeWidth={2.5} />
+            <RotateCcw size={18} strokeWidth={2.5} />
           </button>
         </div>
       </header>
 
-      {/* Game Area */}
-      <main className="flex-1 overflow-auto relative flex items-center justify-center p-4">
+      {/* Game Area - full bleed on mobile */}
+      <main className="flex-1 overflow-hidden relative">
         {renderGame()}
       </main>
     </div>
