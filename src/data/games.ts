@@ -27,7 +27,7 @@ export const GAMES: GameInfo[] = [
   // {
   //   id: 'chess',
   //   name: '国际象棋',
-  //   description: '策略深远的西方经典棋类。',
+  //   description: '策略深远的西方经典策略游戏。',
   //   color: 'bg-blue-100 text-blue-600 border-blue-200',
   //   icon: 'Crown',
   //   players: 2,
@@ -73,11 +73,22 @@ export interface TutorialInfo {
 }
 
 export const TUTORIALS: Record<string, TutorialInfo> = {
+  'coding-rabbit': {
+    gameId: 'coding-rabbit',
+    title: '像素编码教学',
+    content: [
+      '像素编码是一款基于逻辑编程的闯关益智游戏。',
+      '目标：通过拼接基础的程序块，控制小动物自动走到终点并收集所有食物。',
+      '基础块：包括“前进”、“左转”、“右转”等指令。',
+      '循环块：你可以将多条重复的指令放入“循环”中，以此来减少代码行数。',
+      '高分技巧：通关时采用的指令长度越短，评价就越高！',
+    ]
+  },
   gomoku: {
     gameId: 'gomoku',
     title: '五子棋教学',
     content: [
-      '五子棋是一种两人对弈的纯策略型棋类游戏。',
+      '五子棋是一种两人对弈的纯策略型智力游戏。',
       '棋具：通常使用15×15的棋盘，黑白两色棋子。',
       '规则：黑棋先手，白棋后手，两人轮流落子。',
       '胜负：最先在横、竖、斜任意一个方向上连成5个同色棋子的一方获胜。',
@@ -88,7 +99,7 @@ export const TUTORIALS: Record<string, TutorialInfo> = {
     gameId: 'chess',
     title: '国际象棋教学',
     content: [
-      '国际象棋是世界上最受欢迎的棋类游戏之一。',
+      '国际象棋是世界上最受欢迎的智力游戏之一。',
       '棋盘：8×8的黑白相间格子。',
       '棋子：王(1)、后(1)、车(2)、象(2)、马(2)、兵(8)。',
       '走法：',
@@ -105,7 +116,7 @@ export const TUTORIALS: Record<string, TutorialInfo> = {
     gameId: 'go',
     title: '围棋教学',
     content: [
-      '围棋是世界上最古老的棋类游戏之一。',
+      '围棋是世界上最古老的策略游戏之一。',
       '棋盘：19×19的网格交叉点。',
       '规则：黑先白后，交替落子于交叉点上。落子无悔。',
       '气：棋子直线紧邻的空点称为"气"。没有气的棋子会被"提"掉（吃掉）。',
@@ -117,7 +128,7 @@ export const TUTORIALS: Record<string, TutorialInfo> = {
     gameId: 'animal-chess',
     title: '斗兽棋教学',
     content: [
-      '斗兽棋是一款趣味性极强的儿童棋类游戏。',
+      '斗兽棋是一款趣味性极强的儿童益智游戏。',
       '棋盘：7×9的格子，包含河流、陷阱和兽穴。',
       '棋子大小：象 > 狮 > 虎 > 豹 > 狼 > 狗 > 猫 > 鼠。',
       '特殊规则：',
@@ -131,7 +142,7 @@ export const TUTORIALS: Record<string, TutorialInfo> = {
     gameId: 'junqi',
     title: '军棋教学',
     content: [
-      '军棋是一款模拟战争的棋类游戏。',
+      '军棋是一款模拟战争的策略类游戏。',
       '棋子大小：司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵。',
       '特殊棋子：',
       '- 炸弹：与任何敌方棋子同归于尽。',

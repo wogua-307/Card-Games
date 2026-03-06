@@ -19,10 +19,10 @@ export function Tutorials({ onPlayGame }: TutorialsProps) {
       >
         <h1 className="text-4xl font-extrabold text-slate-800 mb-3 tracking-tight flex items-center gap-3">
           <BookOpen className="text-rose-400" size={36} />
-          棋类小课堂
+          益智小课堂
         </h1>
         <p className="text-slate-500 font-medium text-lg">
-          从零开始，成为棋盘大师！
+          从零开始，成为益智大师！
         </p>
       </motion.div>
 
@@ -37,9 +37,8 @@ export function Tutorials({ onPlayGame }: TutorialsProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className={`bg-white rounded-3xl overflow-hidden shadow-sm border-2 transition-all duration-300 ${
-                isSelected ? 'border-rose-300 shadow-md' : 'border-slate-100 hover:border-rose-100'
-              }`}
+              className={`bg-white rounded-3xl overflow-hidden shadow-sm border-2 transition-all duration-300 ${isSelected ? 'border-rose-300 shadow-md' : 'border-slate-100 hover:border-rose-100'
+                }`}
             >
               <button
                 onClick={() => setSelectedGame(isSelected ? null : game.id)}
@@ -80,7 +79,7 @@ export function Tutorials({ onPlayGame }: TutorialsProps) {
                           </li>
                         ))}
                       </ul>
-                      
+
                       <button
                         onClick={() => onPlayGame(game.id)}
                         className="w-full sm:w-auto flex items-center justify-center gap-2 bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 rounded-2xl font-bold transition-colors shadow-sm shadow-rose-200"

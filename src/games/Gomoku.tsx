@@ -154,20 +154,8 @@ export function Gomoku({ onGameOver, onBack }: GomokuProps) {
   // ─── Mode Selection Screen ────────────────────────────────────────────────
   if (gameMode === null) {
     return (
-      <div className="flex flex-col items-center w-full min-h-full bg-[#F5F0E8] p-4 md:p-8">
-        <header className="w-full max-w-md flex justify-between items-center mb-8">
-          <div className="flex items-center gap-3">
-            {onBack && (
-              <button onClick={onBack} className="p-2 rounded-full bg-white/80 shadow-sm text-slate-600 hover:bg-white transition-all">
-                <ArrowLeft size={20} />
-              </button>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">五子棋</h1>
-              <p className="text-slate-500 text-xs">Gobang · 选择游戏模式</p>
-            </div>
-          </div>
-        </header>
+      <div className="flex flex-col items-center w-full h-full overflow-y-auto bg-[#F5F0E8] p-4 md:p-8">
+        {/* Removed internal header */}
 
         <div className="flex flex-col gap-4 w-full max-w-xs">
           {/* PvP Mode */}
@@ -206,8 +194,8 @@ export function Gomoku({ onGameOver, onBack }: GomokuProps) {
                     key={d}
                     onClick={() => setAIDifficulty(d)}
                     className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${aiDifficulty === d
-                        ? 'bg-amber-400 border-amber-400 text-white shadow-sm'
-                        : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-amber-50'
+                      ? 'bg-amber-400 border-amber-400 text-white shadow-sm'
+                      : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-amber-50'
                       }`}
                   >
                     {d === 'easy' ? '简单' : d === 'medium' ? '中等' : '困难'}
@@ -259,30 +247,10 @@ export function Gomoku({ onGameOver, onBack }: GomokuProps) {
   const opponentName = isAIMode ? `AI (${aiDifficulty === 'easy' ? '简单' : aiDifficulty === 'medium' ? '中等' : '困难'})` : '玩家 二';
 
   return (
-    <div className="flex flex-col items-center w-full min-h-full bg-[#F5F0E8] p-4 md:p-6">
+    <div className="flex flex-col items-center w-full h-full overflow-y-auto bg-[#F5F0E8] p-4 md:p-6">
 
       {/* Header */}
-      <header className="w-full max-w-5xl flex justify-between items-center mb-6">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setGameMode(null)} className="p-2 rounded-full bg-white/80 shadow-sm text-slate-600 hover:bg-white transition-all">
-            <ArrowLeft size={20} />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">五子棋</h1>
-            <p className="text-slate-500 text-xs">
-              {isAIMode ? `🤖 人机对战 · ${aiDifficulty === 'easy' ? '简单' : aiDifficulty === 'medium' ? '中等' : '困难'}` : '👥 双人对战'}
-            </p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button className="p-2.5 bg-white rounded-full shadow-sm text-slate-500 hover:text-slate-800 transition-all hover:shadow-md">
-            <Share2 size={18} />
-          </button>
-          <button className="p-2.5 bg-white rounded-full shadow-sm text-slate-500 hover:text-slate-800 transition-all hover:shadow-md">
-            <Settings size={18} />
-          </button>
-        </div>
-      </header>
+      {/* Removed internal Game Board header */}
 
       <main className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center justify-center w-full max-w-5xl">
 

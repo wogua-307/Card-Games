@@ -177,30 +177,9 @@ export function Go({ onGameOver, onBack }: GoProps) {
   ];
 
   return (
-    <div className="flex flex-col items-center w-full min-h-full bg-[#F5F0E8] p-4 md:p-6">
+    <div className="flex flex-col items-center w-full h-full overflow-y-auto bg-[#F5F0E8] p-4 md:p-6">
 
-      {/* Header */}
-      <header className="w-full max-w-6xl flex justify-between items-center mb-6">
-        <div className="flex items-center gap-3">
-          {onBack && (
-            <button onClick={onBack} className="p-2 rounded-full bg-white/80 shadow-sm text-slate-600 hover:bg-white transition-all">
-              <ArrowLeft size={20} />
-            </button>
-          )}
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">围棋</h1>
-            <p className="text-slate-500 text-xs">Weiqi / Go · Standard 19x19</p>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button className="p-2.5 bg-white rounded-full shadow-sm text-slate-500 hover:text-slate-800 transition-all hover:shadow-md">
-            <Share2 size={18} />
-          </button>
-          <button className="p-2.5 bg-white rounded-full shadow-sm text-slate-500 hover:text-slate-800 transition-all hover:shadow-md">
-            <Settings size={18} />
-          </button>
-        </div>
-      </header>
+      {/* Removed internal header */}
 
       <main className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center justify-center w-full max-w-6xl">
 
@@ -311,8 +290,8 @@ export function Go({ onGameOver, onBack }: GoProps) {
                       {/* Hover / Error preview */}
                       {cell === null && winner === null && (
                         <div className={`absolute w-[70%] h-[70%] rounded-full transition-opacity ${isShaking
-                            ? 'opacity-60 bg-rose-500 animate-pulse' // Error state for invalid move
-                            : `opacity-0 group-hover:opacity-25 ${isBlackTurn ? 'bg-black' : 'bg-white border border-gray-400'}`
+                          ? 'opacity-60 bg-rose-500 animate-pulse' // Error state for invalid move
+                          : `opacity-0 group-hover:opacity-25 ${isBlackTurn ? 'bg-black' : 'bg-white border border-gray-400'}`
                           }`}
                         />
                       )}

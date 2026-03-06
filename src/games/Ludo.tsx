@@ -299,27 +299,8 @@ export function Ludo({ onGameOver, onBack }: LudoProps) {
   }
 
   return (
-    <div className="flex flex-col items-center w-full min-h-full bg-[#F5F0E8] p-3 gap-3">
-      {/* Header */}
-      <header className="w-full max-w-3xl flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          {onBack && (
-            <button onClick={onBack} className="p-2 rounded-full bg-white/80 shadow-sm text-slate-600 hover:bg-white transition-all">
-              <ArrowLeft size={20} />
-            </button>
-          )}
-          <div>
-            <h1 className="text-2xl font-bold text-slate-800">飞行棋</h1>
-            <p className="text-slate-500 text-xs">Ludo · 四人对战</p>
-          </div>
-        </div>
-        <div
-          className="flex items-center gap-2 px-4 py-2 rounded-full text-white text-sm font-bold shadow-md"
-          style={{ background: COLORS[color].bg }}
-        >
-          ✈ {COLORS[color].name} 回合
-        </div>
-      </header>
+    <div className="flex flex-col items-center w-full h-full overflow-y-auto bg-[#F5F0E8] p-3 gap-3">
+      {/* Removed internal header */}
 
       {/* Message ticker */}
       <div className="w-full max-w-3xl overflow-hidden">

@@ -19,7 +19,7 @@ export function Home({ onSelectGame }: HomeProps) {
           今天想玩点什么？<span className="text-rose-400">👋</span>
         </h1>
         <p className="text-slate-500 font-medium text-lg">
-          选择一个棋类游戏开始对战或学习
+          选择一个益智游戏开始挑战或学习
         </p>
       </motion.div>
 

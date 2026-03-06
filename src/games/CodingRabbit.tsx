@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { ArrowLeft, RotateCcw, HelpCircle, Volume2, VolumeX } from 'lucide-react';
 
 // ─────────────────────────────────────────────
 // Types
@@ -988,11 +989,20 @@ function GameGrid({
                     }} />
                 )}
 
-                {/* 3D Entities */}
-                {cell.tree && <Barrier3D />}
-                {/* isDecorTree && <Plant3D /> */}{/* 小花装饰已隐藏，需要时取消注释 */}
-                {cell.carrot && !isRabbit && <Collectible />}
-                {isRabbit && <Player dir={displayRabbit.dir} />}
+                {/* 3D Entities Container - Scales down models designed for 80x80 */}
+                <div style={{
+                  position: 'absolute',
+                  width: 80,
+                  height: 80,
+                  transform: `scale(${CELL_SIZE / 80})`,
+                  transformOrigin: 'top left',
+                  transformStyle: 'preserve-3d',
+                  pointerEvents: 'none',
+                }}>
+                  {cell.tree && <Barrier3D />}
+                  {cell.carrot && !isRabbit && <Collectible />}
+                  {isRabbit && <Player dir={displayRabbit.dir} />}
+                </div>
               </div>
             );
           })
@@ -1184,12 +1194,18 @@ function AchievementsSelect({ completedLevels, onClose }: {
 // Main Game Component
 // ─────────────────────────────────────────────
 interface CodingRabbitProps {
+  key?: React.Key;
   onGameOver?: (result: string) => void;
+  onBack?: () => void;
+  onRestart?: () => void;
+  onHelp?: () => void;
+  isMuted?: boolean;
+  toggleMute?: () => void;
 }
 
 type GamePhase = 'idle' | 'running' | 'paused' | 'won' | 'failed';
 
-export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
+export function CodingRabbit({ onGameOver, onBack, onRestart, onHelp, isMuted, toggleMute }: CodingRabbitProps) {
   const [levelId, setLevelId] = useState(1);
   const [endlessLevels, setEndlessLevels] = useState<LevelDef[]>([]);
   const [program, setProgram] = useState<Cmd[]>([]);
@@ -1281,7 +1297,7 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
     let s = initialExecState();
     for (const step of flat) {
       s = applyStep(step, s);
-      states.push({ row: s.row, col: s.col, dir: s.dir, grid: s.grid });
+      states.push(s);
     }
     return { states, finalCollected: states.length > 0 ? (states[states.length - 1] as any).collected ?? 0 : 0, execState: s };
   }, [program, initialExecState]);
@@ -1421,41 +1437,34 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
   return (
     <div className="flex flex-col items-center w-full h-full min-h-0 bg-[#d8f0f0] select-none" style={{ fontFamily: "'Nunito', 'Segoe UI', sans-serif" }}>
 
-      {/* ── Header ── */}
-      <div className="w-full flex items-center justify-between px-3 md:px-6 py-2 md:py-3 bg-white/70 backdrop-blur-md border-b border-white/50 shadow-sm z-20 gap-2">
-        {/* Left: title + theme */}
+      {/* ── Unified Header ── */}
+      <div className="w-full flex items-center justify-between px-3 md:px-6 py-2 md:py-3 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm z-20 gap-2 shrink-0">
+        {/* Left Side: Back button & Rabbit Game Title */}
         <div className="flex items-center gap-2 md:gap-4 min-w-0">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-rose-50 hover:text-rose-500 transition-colors shrink-0"
+            >
+              <ArrowLeft size={18} strokeWidth={2.5} />
+            </button>
+          )}
           <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-            <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-orange-100 rounded-full text-xl md:text-2xl shadow-sm">
+            <div className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center bg-orange-100 rounded-full text-xl md:text-2xl shadow-sm border border-orange-200">
               {gameTheme.emoji}
             </div>
             <h1 className="text-base md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-rose-500 tracking-tight whitespace-nowrap">
-              {gameTheme.name}{gameTheme.collectibleName}
+              {gameTheme.name}
             </h1>
-          </div>
-          {/* Theme toggle - hidden on small mobile, show on md+ */}
-          <div className="hidden sm:flex bg-slate-100/80 backdrop-blur rounded-full p-1 border border-slate-200 shadow-inner gap-1">
-            {THEMES.map(theme => (
-              <button
-                key={theme.id}
-                onClick={() => { setGameTheme(theme); resetLevel(); }}
-                className={`w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center text-lg md:text-xl transition-all ${gameTheme.id === theme.id ? 'bg-white shadow-sm scale-110' : 'hover:scale-110 grayscale opacity-60 hover:opacity-100 hover:grayscale-0'
-                  }`}
-                title={theme.name}
-              >
-                {theme.emoji}
-              </button>
-            ))}
           </div>
         </div>
 
-        {/* Right side buttons */}
-        <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-          {/* Run button */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Start Button */}
           <button
             onClick={handleRun}
             className={`
-              px-3 md:px-6 py-2 md:py-2.5 rounded-full font-extrabold text-xs md:text-sm shadow-sm transition-all
+              px-3 md:px-6 py-2 md:py-2.5 rounded-full font-extrabold text-xs md:text-sm shadow-sm transition-all flex items-center gap-1.5
               ${(phase === 'running' || phase === 'paused')
                 ? 'bg-red-500 text-white hover:bg-red-600 active:scale-95'
                 : 'bg-[#f48c06] text-white hover:bg-[#e85d04] active:scale-95'
@@ -1465,49 +1474,12 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
             {phase === 'running' ? '⏸ 暂停' : phase === 'paused' ? '▶ 继续' : '▶ 开始'}
           </button>
 
-          {/* Desktop buttons: Level select, Achievements, Mode toggle (hidden on sm, visible md+) */}
-          <div className="hidden sm:flex items-center gap-2 md:gap-3">
-            {/* Level select */}
-            <button
-              onClick={() => setShowLevelSelect(true)}
-              className="px-2 md:px-5 py-2 md:py-2.5 rounded-full font-bold text-xs md:text-sm bg-orange-50 text-orange-600 border-2 border-orange-100 hover:bg-orange-100 transition-colors shadow-sm"
-            >
-              关卡选择
-            </button>
-
-            {/* Achievements */}
-            <button
-              onClick={() => setShowAchievements(true)}
-              className="px-2 md:px-5 py-2 md:py-2.5 rounded-full font-bold text-xs md:text-sm bg-white text-slate-600 border-2 border-blue-600 shadow-[0_0_0_2px_rgba(37,99,235,0.2)] hover:bg-slate-50 transition-colors"
-            >
-              成就记录
-            </button>
-
-            {/* Mode toggle */}
-            <div className="flex bg-slate-100 rounded-full p-0.5 border border-slate-200 shadow-inner">
-              <button
-                onClick={() => { setGameMode('beginner'); resetLevel(); }}
-                className={`px-2 md:px-4 py-1.5 md:py-2 rounded-full font-bold text-xs md:text-sm transition-all ${gameMode === 'beginner' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                  }`}
-              >
-                🌱
-              </button>
-              <button
-                onClick={() => { setGameMode('hard'); resetLevel(); }}
-                className={`px-2 md:px-4 py-1.5 md:py-2 rounded-full font-bold text-xs md:text-sm transition-all ${gameMode === 'hard' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
-                  }`}
-              >
-                🌲
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile Menu Button - visible on sm and below */}
+          {/* Unified Settings Menu Button (Visible on all screens) */}
           <button
             onClick={() => setShowMobileMenu(true)}
-            className="sm:hidden w-8 h-8 flex items-center justify-center bg-slate-100 rounded-full text-slate-500 hover:bg-slate-200 transition-colors border border-slate-200 shadow-sm"
+            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-full text-slate-500 hover:bg-slate-200 transition-colors shadow-sm shrink-0"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
@@ -1872,6 +1844,22 @@ export function CodingRabbit({ onGameOver }: CodingRabbitProps) {
                     className="py-3.5 rounded-2xl font-bold text-sm bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center gap-2"
                   >
                     🏆 成就记录
+                  </button>
+                </div>
+
+                {/* 系统操作 - 接管全局 */}
+                <div className="flex justify-between gap-2 pt-4 border-t border-slate-100">
+                  <button onClick={() => { toggleMute && toggleMute(); setShowMobileMenu(false); }} className="flex-1 py-3 rounded-2xl bg-white border border-slate-100 text-slate-600 font-bold flex flex-col items-center gap-1.5 shadow-sm hover:bg-slate-50 transition-colors">
+                    {isMuted ? <VolumeX size={22} className="text-slate-400" /> : <Volume2 size={22} className="text-emerald-500" />}
+                    <span className="text-[11px]">{isMuted ? '已静音' : '开启音效'}</span>
+                  </button>
+                  <button onClick={() => { onRestart && onRestart(); setShowMobileMenu(false); }} className="flex-1 py-3 rounded-2xl bg-white border border-slate-100 text-slate-600 font-bold flex flex-col items-center gap-1.5 shadow-sm hover:bg-slate-50 transition-colors">
+                    <RotateCcw size={22} className="text-orange-500" />
+                    <span className="text-[11px]">重置环境</span>
+                  </button>
+                  <button onClick={() => { onHelp && onHelp(); setShowMobileMenu(false); }} className="flex-1 py-3 rounded-2xl bg-white border border-slate-100 text-slate-600 font-bold flex flex-col items-center gap-1.5 shadow-sm hover:bg-slate-50 transition-colors">
+                    <HelpCircle size={22} className="text-blue-500" />
+                    <span className="text-[11px]">玩法说明</span>
                   </button>
                 </div>
               </div>
