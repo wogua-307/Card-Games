@@ -16,7 +16,7 @@ export function Layout({ children, currentTab, setCurrentTab }: LayoutProps) {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-[#FFFDF9] md:flex-row">
+    <div className="flex flex-col h-[100dvh] bg-[#FFFDF9] md:flex-row">
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-rose-100 p-6 shadow-sm z-10">
         <div className="flex items-center gap-3 mb-10">
@@ -34,8 +34,8 @@ export function Layout({ children, currentTab, setCurrentTab }: LayoutProps) {
                 key={tab.id}
                 onClick={() => setCurrentTab(tab.id)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 font-bold ${isActive
-                    ? 'bg-rose-100 text-rose-600 shadow-sm'
-                    : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
+                  ? 'bg-rose-100 text-rose-600 shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                   }`}
               >
                 <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
@@ -64,7 +64,7 @@ export function Layout({ children, currentTab, setCurrentTab }: LayoutProps) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto relative pb-20 md:pb-0 flex flex-col">
+      <main className="flex-1 overflow-y-auto relative pb-28 md:pb-0 flex flex-col">
         <div className="flex-1">
           {children}
         </div>
