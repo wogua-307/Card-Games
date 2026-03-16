@@ -1223,6 +1223,7 @@ export function CodingRabbit({ onGameOver, onBack, onRestart, onHelp, isMuted, t
   const [activeLoopId, setActiveLoopId] = useState<string | null>(null);
   const [collected, setCollected] = useState(0);
   const [showComplete, setShowComplete] = useState(false);
+  const [openDesktopMenu, setOpenDesktopMenu] = useState<'role' | 'difficulty' | 'system' | null>(null);
 
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -1459,6 +1460,138 @@ export function CodingRabbit({ onGameOver, onBack, onRestart, onHelp, isMuted, t
           </div>
         </div>
 
+        {/* Desktop-only grouped secondary menus in top nav */}
+        <div className="hidden lg:flex items-center justify-center gap-4 flex-1">
+          {/* 角色 二级菜单 */}
+          <div className="relative">
+            <button
+              onClick={() => setOpenDesktopMenu(openDesktopMenu === 'role' ? null : 'role')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-xs font-bold text-slate-600 hover:bg-white shadow-sm"
+            >
+              <span className="text-slate-400">角色</span>
+              <span>{gameTheme.emoji}</span>
+              <span className="hidden xl:inline">{gameTheme.name}</span>
+            </button>
+            {openDesktopMenu === 'role' && (
+              <div className="absolute z-30 mt-2 left-0 min-w-[220px] bg-white rounded-2xl shadow-xl border border-slate-100 py-2">
+                {THEMES.map(theme => (
+                  <button
+                    key={theme.id}
+                    onClick={() => {
+                      setGameTheme(theme);
+                      resetLevel();
+                      setOpenDesktopMenu(null);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-2 text-xs font-bold rounded-lg transition-colors
+                      ${gameTheme.id === theme.id ? 'bg-orange-50 text-orange-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="text-lg">{theme.emoji}</span>
+                      <span>{theme.name}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* 难度 二级菜单 */}
+          <div className="relative">
+            <button
+              onClick={() => setOpenDesktopMenu(openDesktopMenu === 'difficulty' ? null : 'difficulty')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-xs font-bold text-slate-600 hover:bg-white shadow-sm"
+            >
+              <span className="text-slate-400">难度</span>
+              {gameMode === 'beginner' ? (
+                <span className="flex items-center gap-1 text-emerald-600">
+                  🌱 <span className="hidden xl:inline">入门 无障碍，更适合新手</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1 text-rose-600">
+                  🌲 <span className="hidden xl:inline">困难 包含蘑菇障碍</span>
+                </span>
+              )}
+            </button>
+            {openDesktopMenu === 'difficulty' && (
+              <div className="absolute z-30 mt-2 left-0 min-w-[260px] bg-white rounded-2xl shadow-xl border border-slate-100 py-2">
+                <button
+                  onClick={() => {
+                    setGameMode('beginner');
+                    resetLevel();
+                    setOpenDesktopMenu(null);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-2 text-xs font-bold rounded-lg transition-colors
+                    ${gameMode === 'beginner' ? 'bg-emerald-50 text-emerald-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="text-lg">🌱</span>
+                    <span>入门模式</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">无障碍，更适合新手</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setGameMode('hard');
+                    resetLevel();
+                    setOpenDesktopMenu(null);
+                  }}
+                  className={`w-full flex items-center justify-between px-4 py-2 text-xs font-bold rounded-lg transition-colors
+                    ${gameMode === 'hard' ? 'bg-rose-50 text-rose-700' : 'text-slate-600 hover:bg-slate-50'}`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="text-lg">🌲</span>
+                    <span>困难模式</span>
+                  </span>
+                  <span className="text-[10px] text-slate-400">包含蘑菇障碍，更接近真实逻辑</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* 系统 二级菜单：成就、音量、刷新、帮助 */}
+          <div className="relative">
+            <button
+              onClick={() => setOpenDesktopMenu(openDesktopMenu === 'system' ? null : 'system')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-xs font-bold text-slate-600 hover:bg-white shadow-sm"
+            >
+              <span className="text-slate-400">更多</span>
+              <span>⋯</span>
+            </button>
+            {openDesktopMenu === 'system' && (
+              <div className="absolute z-30 mt-2 right-0 min-w-[240px] bg-white rounded-2xl shadow-xl border border-slate-100 py-2">
+                <button
+                  onClick={() => { setShowAchievements(true); setOpenDesktopMenu(null); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg"
+                >
+                  <span className="text-lg">🏆</span>
+                  <span>成就记录</span>
+                </button>
+                <button
+                  onClick={() => { toggleMute && toggleMute(); setOpenDesktopMenu(null); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg"
+                >
+                  {isMuted ? <VolumeX size={16} className="text-slate-400" /> : <Volume2 size={16} className="text-emerald-500" />}
+                  <span>{isMuted ? '已静音' : '开启音效'}</span>
+                </button>
+                <button
+                  onClick={() => { onRestart && onRestart(); setOpenDesktopMenu(null); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg"
+                >
+                  <RotateCcw size={16} className="text-orange-500" />
+                  <span>重置环境</span>
+                </button>
+                <button
+                  onClick={() => { onHelp && onHelp(); setOpenDesktopMenu(null); }}
+                  className="w-full flex items-center gap-2 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-lg"
+                >
+                  <HelpCircle size={16} className="text-blue-500" />
+                  <span>玩法说明</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
         <div className="flex items-center gap-2 shrink-0">
           {/* Start Button */}
           <button
@@ -1474,10 +1607,10 @@ export function CodingRabbit({ onGameOver, onBack, onRestart, onHelp, isMuted, t
             {phase === 'running' ? '⏸ 暂停' : phase === 'paused' ? '▶ 继续' : '▶ 开始'}
           </button>
 
-          {/* Unified Settings Menu Button (Visible on all screens) */}
+          {/* Settings Menu Button: 保留给移动端 / 小屏使用 */}
           <button
             onClick={() => setShowMobileMenu(true)}
-            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-full text-slate-500 hover:bg-slate-200 transition-colors shadow-sm shrink-0"
+            className="w-9 h-9 md:w-10 md:h-10 flex items-center justify-center bg-slate-50 border border-slate-200 rounded-full text-slate-500 hover:bg-slate-200 transition-colors shadow-sm shrink-0 lg:hidden"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
               <path d="M4 6h16M4 12h16M4 18h16" />
@@ -1625,25 +1758,6 @@ export function CodingRabbit({ onGameOver, onBack, onRestart, onHelp, isMuted, t
                 <span className="text-xl md:text-2xl drop-shadow-sm">{gameTheme.collectibleEmoji}</span>
                 <span className="font-extrabold text-orange-500 text-base md:text-xl">{collected} / {totalCarrots}</span>
               </div>
-
-              {/* Status/Run Button */}
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleRun}
-                disabled={program.length === 0 && phase === 'idle'}
-                className={`
-                  flex-1 py-2.5 md:py-3 px-4 md:px-6 rounded-full font-extrabold text-white text-base md:text-lg shadow-md transition-colors flex items-center justify-center gap-2
-                  ${phase === 'running'
-                    ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-200'
-                    : phase === 'paused'
-                      ? 'bg-sky-400 hover:bg-sky-500 shadow-sky-200'
-                      : 'bg-[#ffaa80] hover:bg-[#ff9966] shadow-orange-200'}
-                  disabled:opacity-50 disabled:grayscale
-                `}
-              >
-                {phase === 'running' ? '⏸ 暂停' : phase === 'paused' ? '▶ 继续' : '▶ 运行'}
-              </motion.button>
             </div>
 
             <div className="flex items-center gap-3 md:gap-4 px-1 md:px-2">
